@@ -8,7 +8,7 @@ import 'package:bokeh_gen/src/template/params.dart';
 
 import 'template/bokeh.dart';
 
-class bokehDataGenerator extends GeneratorForAnnotation<Data> {
+class BokehDataGenerator extends GeneratorForAnnotation<Data> {
   @override
   FutureOr<String> generateForAnnotatedElement(
       Element element, ConstantReader annotation, BuildStep buildStep) {
@@ -39,7 +39,7 @@ class bokehDataGenerator extends GeneratorForAnnotation<Data> {
           ParamTemplate(param.isNamed, param.type.displayName, param.name));
     }
 
-    var bokehClass = bokehTemplate(classElement.name, bokehParams);
+    var bokehClass = BokehTemplate(classElement.name, bokehParams);
     var bokehInitClass = bokehInitTemplate(classElement.name, bokehParams);
 
     return bokehClass.toString() + "\n\n" + bokehInitClass.toString();

@@ -7,7 +7,10 @@ class Data {
   const Data({this.prefix = "_\$"});
 }
 
+/// Jenkins Hash Functions
+/// https://en.wikipedia.org/wiki/Jenkins_hash_function
 /// For use by generated code in calculating hash codes. Do not use directly.
+/// jenkins combine
 int $jc(int hash, int value) {
   // Jenkins hash "combine".
   hash = 0x1fffffff & (hash + value);
@@ -16,6 +19,7 @@ int $jc(int hash, int value) {
 }
 
 /// For use by generated code in calculating hash codes. Do not use directly.
+/// jenkins finish
 int $jf(int hash) {
   // Jenkins hash "finish".
   hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));

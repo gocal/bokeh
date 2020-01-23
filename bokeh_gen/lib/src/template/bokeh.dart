@@ -2,13 +2,11 @@ import 'package:bokeh_gen/src/template/hash_code.dart';
 import 'package:bokeh_gen/src/template/params.dart';
 import 'package:bokeh_gen/src/template/to_string.dart';
 
-import 'comma_list.dart';
-
-class bokehTemplate {
+class BokehTemplate {
   final String className;
   ParamListTemplate<GetterParamTemplate> params;
 
-  bokehTemplate(this.className, List<ParamTemplate> args) {
+  BokehTemplate(this.className, List<ParamTemplate> args) {
     var bokehClassParams = <GetterParamTemplate>[];
     for (int i = 0; i < args.length; i++) {
       var param = args[i];
