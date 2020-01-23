@@ -36,8 +36,16 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEventsClass> {
     events.methods.forEach((method) {
       final String name = method.name;
 
+      final className = '${name.pascalCase}_${eventType.getDisplayString()}';
+
+      final equalsMethod = _generateEqualsMethod(className, method.parameters);
+      final hashCodeMethod = _generateHashCodeMethod(method.parameters);
+      final toStringMethod =
+          _generateToStringMethod(className, method.parameters);
+
       final eventBuilder = ClassBuilder()
-        ..name = '${name.pascalCase}_${eventType.getDisplayString()}'
+        ..name = className
+        ..implements.add(refer(eventType.displayName))
         ..constructors.add((ConstructorBuilder()
               ..optionalParameters.addAll(method.parameters.map((param) {
                 final builder = ParameterBuilder()
@@ -54,35 +62,19 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEventsClass> {
             ..modifier = FieldModifier.final$
             ..type = refer(param.type.displayName);
           return builder.build();
-        }));
+        }))
+        ..methods.add(equalsMethod)
+        ..methods.add(hashCodeMethod)
+        ..methods.add(toStringMethod);
 
       eventsClassesBuilders.add(eventBuilder);
     });
-
-    final equalsMethod =
-        _generateEqualsMethod(element.displayName, events.fields);
-    final copyWithMethod = _generateCopyWithMethod(events, events.fields);
-    final hashCodeMethod = _generateHashCodeMethod(events.fields);
-    final toStringMethod =
-        _generateToStringMethod(element.displayName, events.fields);
-
-    final getters = events.fields
-        .map((field) => MethodBuilder()
-          ..name = field.displayName
-          ..returns = refer(field.type.displayName)
-          ..type = MethodType.getter)
-        .map((mb) => mb.build());
 
     final partialClass = ClassBuilder()
       ..name = '_\$${element.name}'
       ..constructors.add((ConstructorBuilder()..constant = true).build())
       ..types.addAll(events.typeParameters
           .map((typeParam) => refer(typeParam.displayName)))
-      ..methods.addAll(getters)
-      ..methods.add(equalsMethod)
-      ..methods.add(hashCodeMethod)
-      ..methods.add(toStringMethod)
-      ..methods.add(copyWithMethod)
       ..abstract = true;
 
     final stringBuilder = StringBuffer();
@@ -126,7 +118,8 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEventsClass> {
         });
   }
 
-  Method _generateEqualsMethod(String className, List<FieldElement> fields) {
+  Method _generateEqualsMethod(
+      String className, List<ParameterElement> fields) {
     MethodBuilder mb = MethodBuilder()
       ..name = 'operator=='
       ..requiredParameters.add((ParameterBuilder()..name = 'other').build())
@@ -140,19 +133,10 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEventsClass> {
         ),
       );
 
-    fields.map(
-      (element) => element.metadata.map(
-        (annotation) => annotation
-            .computeConstantValue()
-            .getField('deepEquality')
-            .toBoolValue(),
-      ),
-    );
-
     return mb.build();
   }
 
-  bool _hasDeepCollectionEquality(FieldElement fieldElement) {
+  bool _hasDeepCollectionEquality(ParameterElement fieldElement) {
     /*
     final collectionAnnotation =
         TypeChecker.fromRuntime(Collection).firstAnnotationOf(fieldElement);
@@ -166,7 +150,7 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEventsClass> {
     return false;
   }
 
-  Method _generateHashCodeMethod(List<FieldElement> fields) {
+  Method _generateHashCodeMethod(List<ParameterElement> fields) {
     String body;
 
     if (fields.isEmpty) {
@@ -182,7 +166,7 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEventsClass> {
       }
 
       body = """
-          \$jf($hashString)
+          return \$jf($hashString);
         """;
     }
 
@@ -196,7 +180,7 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEventsClass> {
   }
 
   Method _generateCopyWithMethod(
-      ClassElement clazz, List<FieldElement> fields) {
+      ClassElement clazz, List<ParameterElement> fields) {
     final params = fields
         .map((field) => ParameterBuilder()
           ..name = field.name
@@ -214,7 +198,8 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEventsClass> {
     return mb.build();
   }
 
-  Method _generateToStringMethod(String className, List<FieldElement> fields) {
+  Method _generateToStringMethod(
+      String className, List<ParameterElement> fields) {
     final mb = MethodBuilder()
       ..name = 'toString'
       ..returns = refer('String')
@@ -258,6 +243,6 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEventsClass> {
     final fieldsToString =
         fields.fold('', (r, field) => r + '\\\'$field\\\': \${this.$field},');
 
-    return "return '$className <$fieldsToString>';";
+    return "return '$className [$fieldsToString]';";
   }
 }
