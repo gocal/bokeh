@@ -6,10 +6,10 @@ targets:
 
 builders:
   bokeh:
-    target: ":bokeh_gen"
-    import: "package:bokeh_gen/bokeh_gen.dart"
+    target: ":bokeh_generator"
+    import: "package:bokeh_generator/bokeh_generator.dart"
     builder_factories: ["bokeh"]
-    build_extensions: {".dart": [".bokeh.g.part"]}
+    build_extensions: {".dart": [".g.part"]}
     auto_apply: dependents
     build_to: cache
     applies_builders: ["source_gen|combining_builder"]

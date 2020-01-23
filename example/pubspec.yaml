@@ -7,20 +7,17 @@ authors:
 homepage: https://github.com/gocal/bokeh.dart
 
 environment:
-  sdk: '>=2.0.0-dev <3.0.0'
+  sdk: '>=2.7.0 <3.0.0'
 
 dependencies:
-  built_collection: '>=2.0.0 <5.0.0'
   bloc:
   bokeh:
     path: ../bokeh
 
 dev_dependencies:
   build_runner: ^1.0.0
-  bokeh_gen:
-    path: ../bokeh_gen
-  pedantic: ^1.4.0
-  quiver: '>=0.21.0 <3.0.0'
-  test: ^1.0.0
+  bokeh_generator:
+    path: ../bokeh_generator
+
 
 

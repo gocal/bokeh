@@ -1,7 +1,9 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:bokeh/bokeh.dart';
 
-// part 'login_bloc.g.dart';
+part 'authentication_bloc.g.dart';
 
 /// Events
 @blocEvents
@@ -26,8 +28,6 @@ class AuthenticationBloc
   AuthenticationState get initialState => null;
 
   @override
-  Stream<AuthenticationState> mapEventToState(AuthenticationEvent event) {
-    // TODO: implement mapEventToState
-    return null;
-  }
+  Stream<AuthenticationState> mapEventToState(
+      AuthenticationEvent event) async* {}
 }
