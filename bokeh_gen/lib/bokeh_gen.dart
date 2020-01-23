@@ -1,6 +1,8 @@
 import 'package:build/build.dart';
 import 'package:source_gen/source_gen.dart';
-import 'package:bokeh_gen/src/bokeh_data_generator.dart';
 
-Builder bokeh(BuilderOptions options) =>
-    SharedPartBuilder([BokehDataGenerator()], 'bokeh');
+import 'src/bokeh_bloc_events_generator.dart';
+import 'src/bokeh_bloc_states_generator.dart';
+
+Builder bokeh(BuilderOptions options) => SharedPartBuilder(
+    [BokehBlocEventsGenerator(), BokehBlocStatesGenerator()], 'bokeh');

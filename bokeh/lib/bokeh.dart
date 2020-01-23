@@ -1,10 +1,31 @@
 library bokeh;
 
-const Data data = const Data();
+const BlocEventClass blocEvent = const BlocEventClass();
 
-class Data {
+const BlocStatesClass blocStates = const BlocStatesClass();
+
+const BlocEventsClass blocEvents = const BlocEventsClass();
+
+class BlocClass {
+  final Type state;
+  final Type event;
+
+  const BlocClass({this.state, this.event});
+}
+
+class BlocStatesClass {
   final String prefix;
-  const Data({this.prefix = "_\$"});
+  const BlocStatesClass({this.prefix = "_\$"});
+}
+
+class BlocEventClass {
+  final String prefix;
+  const BlocEventClass({this.prefix = "_\$"});
+}
+
+class BlocEventsClass {
+  final String prefix;
+  const BlocEventsClass({this.prefix = "_\$"});
 }
 
 /// Jenkins Hash Functions
