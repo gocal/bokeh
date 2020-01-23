@@ -1,0 +1,14 @@
+name: bokeh
+version: 0.0.2
+description: >
+  BLoC on Steroids
+authors:
+- Marcin Marek Gocał <marcin.gocal@gmail.com>
+homepage: https://github.com/gocal/bokeh.dart
+
+environment:
+  sdk: '>=2.6.0 <3.0.0'
+
+dev_dependencies:
+  pedantic: ^1.4.0
+  test: ^1.0.0

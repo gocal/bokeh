@@ -1,0 +1,15 @@
+targets:
+  $default:
+    builders:
+      bokeh_gen|bokeh:
+        enabled: true
+
+builders:
+  bokeh:
+    target: ":bokeh_gen"
+    import: "package:bokeh_gen/bokeh_gen.dart"
+    builder_factories: ["bokeh"]
+    build_extensions: {".dart": [".bokeh.g.part"]}
+    auto_apply: dependents
+    build_to: cache
+    applies_builders: ["source_gen|combining_builder"]
