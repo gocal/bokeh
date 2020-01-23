@@ -6,15 +6,18 @@ import 'package:bokeh/bokeh.dart';
 part 'authentication_bloc.g.dart';
 
 /// Events
-@blocEvents
-abstract class AuthenticationEvent {
+abstract class AuthenticationEvent {}
+
+@BlocEventsClass(event: AuthenticationEvent)
+abstract class AuthenticationEvents {
   appStarted();
+  credentialUpdated({String login, String password});
   loggedIn();
   loggedOut();
 }
 
 /// States
-@blocStates
+///@BlocStatesClass()
 abstract class AuthenticationState {
   idle();
   loading();

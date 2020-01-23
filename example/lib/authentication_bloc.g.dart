@@ -6,50 +6,22 @@ part of 'authentication_bloc.dart';
 // BokehBlocEventsGenerator
 // **************************************************************************
 
-abstract class _$AuthenticationEvent {
-  const _$AuthenticationEvent();
-
-  bool operator ==(other) {
-    if (identical(this, other)) return true;
-    if (other is! AuthenticationEvent) return false;
-    return true;
-  }
-
-  int get hashCode {
-    super.hashCode;
-  }
-
-  String toString() {
-    return 'AuthenticationEvent <>';
-  }
-
-  AuthenticationEvent copyWith() {
-    return AuthenticationEvent();
-  }
+class AppStarted_AuthenticationEvent {
+  const AppStarted_AuthenticationEvent();
 }
 
-// **************************************************************************
-// BokehBlocStatesGenerator
-// **************************************************************************
+class CredentialUpdated_AuthenticationEvent {
+  const CredentialUpdated_AuthenticationEvent({this.login, this.password});
 
-abstract class _$AuthenticationState {
-  const _$AuthenticationState();
+  final String login;
 
-  bool operator ==(other) {
-    if (identical(this, other)) return true;
-    if (other is! AuthenticationState) return false;
-    return true;
-  }
+  final String password;
+}
 
-  int get hashCode {
-    super.hashCode;
-  }
+class LoggedIn_AuthenticationEvent {
+  const LoggedIn_AuthenticationEvent();
+}
 
-  String toString() {
-    return 'AuthenticationState <>';
-  }
-
-  AuthenticationState copyWith() {
-    return AuthenticationState();
-  }
+class LoggedOut_AuthenticationEvent {
+  const LoggedOut_AuthenticationEvent();
 }

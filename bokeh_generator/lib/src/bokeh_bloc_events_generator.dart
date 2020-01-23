@@ -6,6 +6,7 @@ import 'package:build/build.dart';
 import 'package:bokeh/bokeh.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
+import 'package:recase/recase.dart';
 
 class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEventsClass> {
   final emitter = DartEmitter();
@@ -18,69 +19,111 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEventsClass> {
     ConstantReader annotation,
     BuildStep buildStep,
   ) {
-    if (element is ClassElement) {
-      _assertElementValid(element);
-
-      final equalsMethod =
-          _generateEqualsMethod(element.displayName, element.fields);
-      final copyWithMethod = _generateCopyWithMethod(element, element.fields);
-      final hashCodeMethod = _generateHashCodeMethod(element.fields);
-      final toStringMethod =
-          _generateToStringMethod(element.displayName, element.fields);
-
-      final getters = element.fields
-          .map((field) => MethodBuilder()
-            ..name = field.displayName
-            ..returns = refer(field.type.displayName)
-            ..type = MethodType.getter)
-          .map((mb) => mb.build());
-
-      final constConstructor = (ConstructorBuilder()..constant = true).build();
-
-      final partialClass = ClassBuilder()
-        ..name = '_\$${element.name}'
-        ..constructors.add(constConstructor)
-        ..types.addAll(element.typeParameters
-            .map((typeParam) => refer(typeParam.displayName)))
-        ..methods.addAll(getters)
-        ..methods.add(equalsMethod)
-        ..methods.add(hashCodeMethod)
-        ..methods.add(toStringMethod)
-        ..methods.add(copyWithMethod)
-        ..abstract = true;
-
-      return formatter.format(partialClass.build().accept(emitter).toString());
-    } else {
+    if (!(element is ClassElement)) {
       throw Exception(
-        '@$annotationName anontation cannot be used on abstract classes',
+        '@$annotationName anontation must be used on class element',
       );
     }
+
+    final events = element as ClassElement;
+
+    final eventType = annotation.read("event").typeValue;
+
+    final eventsClassesBuilders = List<ClassBuilder>();
+
+    _assertElementValid(element);
+
+    events.methods.forEach((method) {
+      final String name = method.name;
+
+      final eventBuilder = ClassBuilder()
+        ..name = '${name.pascalCase}_${eventType.getDisplayString()}'
+        ..constructors.add((ConstructorBuilder()
+              ..optionalParameters.addAll(method.parameters.map((param) {
+                final builder = ParameterBuilder()
+                  ..name = param.name
+                  ..named = true
+                  ..toThis = true;
+                return builder.build();
+              }))
+              ..constant = true)
+            .build())
+        ..fields.addAll(method.parameters.map((param) {
+          final builder = FieldBuilder()
+            ..name = param.name
+            ..modifier = FieldModifier.final$
+            ..type = refer(param.type.displayName);
+          return builder.build();
+        }));
+
+      eventsClassesBuilders.add(eventBuilder);
+    });
+
+    final equalsMethod =
+        _generateEqualsMethod(element.displayName, events.fields);
+    final copyWithMethod = _generateCopyWithMethod(events, events.fields);
+    final hashCodeMethod = _generateHashCodeMethod(events.fields);
+    final toStringMethod =
+        _generateToStringMethod(element.displayName, events.fields);
+
+    final getters = events.fields
+        .map((field) => MethodBuilder()
+          ..name = field.displayName
+          ..returns = refer(field.type.displayName)
+          ..type = MethodType.getter)
+        .map((mb) => mb.build());
+
+    final partialClass = ClassBuilder()
+      ..name = '_\$${element.name}'
+      ..constructors.add((ConstructorBuilder()..constant = true).build())
+      ..types.addAll(events.typeParameters
+          .map((typeParam) => refer(typeParam.displayName)))
+      ..methods.addAll(getters)
+      ..methods.add(equalsMethod)
+      ..methods.add(hashCodeMethod)
+      ..methods.add(toStringMethod)
+      ..methods.add(copyWithMethod)
+      ..abstract = true;
+
+    final stringBuilder = StringBuffer();
+    eventsClassesBuilders.forEach((builder) {
+      stringBuilder.write(builder.build().accept(emitter).toString());
+    });
+    //
+
+    return formatter.format(stringBuilder.toString());
   }
 
   void _assertElementValid(ClassElement element) {
     // abstract
-    if (element.isAbstract == null) {
+    if (element.isAbstract != true) {
       throw InvalidGenerationSourceError(
           'The ${element.name} @$annotationName must be abstract');
     }
 
-    if (element.unnamedConstructor == null) {
+    if (element.unnamedConstructor != null &&
+        element.unnamedConstructor.parameters.isNotEmpty) {
       throw InvalidGenerationSourceError(
-          'The ${element.name} @$annotationName must have unnamed (default) constructor');
+          'The ${element.name} @$annotationName must not have unnamed constructor');
     }
 
-    if (element.unnamedConstructor.parameters.isNotEmpty) {
-      if (!element.unnamedConstructor.parameters
-          .any((param) => param.isNamed)) {
-        throw InvalidGenerationSourceError(
-            'The ${element.name} @$annotationName constructor should have named params only');
-      }
+    if (element.fields.isNotEmpty) {
+      throw InvalidGenerationSourceError(
+          '@$annotationName cannot have parameters');
     }
 
-    if (element.fields.any((field) => !field.isFinal)) {
+    if (element.methods.isEmpty) {
       throw InvalidGenerationSourceError(
-          '@$annotationName should have final fields only');
+          '@$annotationName need at least one method');
     }
+
+    element.methods.forEach((method) => {
+          if (!(method.returnType.isDynamic))
+            {
+              throw InvalidGenerationSourceError(
+                  'Wrong return type ${method.returnType} - needs to be dynamic')
+            }
+        });
   }
 
   Method _generateEqualsMethod(String className, List<FieldElement> fields) {
