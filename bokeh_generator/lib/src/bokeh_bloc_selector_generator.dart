@@ -33,10 +33,25 @@ class BokehBlocSelectorGenerator extends GeneratorForAnnotation<BlocSelector> {
         .substring(0, statesProtocol.displayName.length - 1);
     final methodBuilder = MethodBuilder();
 
-    final bodyBuilder = BlockBuilder();
+    final codeBlocs = List<Code>();
+    protocol.methods.forEach((method) {
+      final args = method.parameters.isNotEmpty
+          ? method.parameters.map((parameter) {
+              final parameterName = parameter.name;
+              final parameterValue =
+                  "(this as ${method.name.pascalCase}).$parameterName";
+
+              return "$parameterName: $parameterValue";
+            }).join(", ")
+          : "";
+
+      codeBlocs.add(Code(
+          "if(this is ${method.name.pascalCase}) { yield* ${method.name.camelCase}($args); return; }"));
+    });
 
     methodBuilder
       ..name = "when"
+      ..modifier = MethodModifier.asyncStar
       ..returns = refer("Stream<$methodName>")
       ..optionalParameters.addAll(protocol.methods.map((method) {
         final ft = FunctionTypeBuilder()
@@ -52,7 +67,7 @@ class BokehBlocSelectorGenerator extends GeneratorForAnnotation<BlocSelector> {
           ..build();
         return paramBuilder.build();
       }))
-      ..body = bodyBuilder.build();
+      ..body = Block.of(codeBlocs);
 
     ///
     /// Build classes

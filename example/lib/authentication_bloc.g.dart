@@ -183,5 +183,24 @@ extension AuthenticationEventExtension on AuthenticationEvent {
       Stream<AuthenticationState> Function({String login, String password})
           credentialUpdated,
       Stream<AuthenticationState> Function() loggedIn,
-      Stream<AuthenticationState> Function() loggedOut}) {}
+      Stream<AuthenticationState> Function() loggedOut}) async* {
+    if (this is AppStarted) {
+      yield* appStarted(timestamp: (this as AppStarted).timestamp);
+      return;
+    }
+    if (this is CredentialUpdated) {
+      yield* credentialUpdated(
+          login: (this as CredentialUpdated).login,
+          password: (this as CredentialUpdated).password);
+      return;
+    }
+    if (this is LoggedIn) {
+      yield* loggedIn();
+      return;
+    }
+    if (this is LoggedOut) {
+      yield* loggedOut();
+      return;
+    }
+  }
 }
