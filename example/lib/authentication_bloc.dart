@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:bloc/bloc.dart';
 import 'package:bokeh/bokeh.dart';
 
@@ -32,15 +33,22 @@ class AuthenticationBloc
   Stream<AuthenticationState> mapEventToState(
       AuthenticationEvent event) async* {
     yield* event.when(
-        // appStarted
-        appStarted: ({int timestamp}) async* {
-      await Future.delayed(Duration());
-      yield AuthenticationState.idle();
-      yield AuthenticationState.loading();
-    },
-        // credentialUpdated
-        credentialUpdated: ({String login, String password}) async* {
-      await Future.delayed(Duration());
-    });
+      //
+      appStarted: (event) async* {
+        await Future.delayed(Duration());
+        yield AuthenticationState.idle();
+        yield AuthenticationState.loading();
+      },
+      //
+      credentialUpdated: (event) async* {
+        await Future.delayed(Duration());
+      },
+
+      //
+      loggedOut: () async* {
+        yield AuthenticationState.idle();
+      },
+      loggedIn: () async* {},
+    );
   }
 }

@@ -179,19 +179,21 @@ class Error implements AuthenticationState {
 
 extension AuthenticationEventExtension on AuthenticationEvent {
   Stream<AuthenticationState> when(
-      {Stream<AuthenticationState> Function({int timestamp}) appStarted,
-      Stream<AuthenticationState> Function({String login, String password})
-          credentialUpdated,
-      Stream<AuthenticationState> Function() loggedIn,
-      Stream<AuthenticationState> Function() loggedOut}) async* {
+      {@required
+          Stream<AuthenticationState> Function(AppStarted) appStarted,
+      @required
+          Stream<AuthenticationState> Function(CredentialUpdated)
+              credentialUpdated,
+      @required
+          Stream<AuthenticationState> Function() loggedIn,
+      @required
+          Stream<AuthenticationState> Function() loggedOut}) async* {
     if (this is AppStarted) {
-      yield* appStarted(timestamp: (this as AppStarted).timestamp);
+      yield* appStarted(this as AppStarted);
       return;
     }
     if (this is CredentialUpdated) {
-      yield* credentialUpdated(
-          login: (this as CredentialUpdated).login,
-          password: (this as CredentialUpdated).password);
+      yield* credentialUpdated(this as CredentialUpdated);
       return;
     }
     if (this is LoggedIn) {

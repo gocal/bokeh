@@ -36,13 +36,7 @@ class BokehBlocSelectorGenerator extends GeneratorForAnnotation<BlocSelector> {
     final codeBlocs = List<Code>();
     protocol.methods.forEach((method) {
       final args = method.parameters.isNotEmpty
-          ? method.parameters.map((parameter) {
-              final parameterName = parameter.name;
-              final parameterValue =
-                  "(this as ${method.name.pascalCase}).$parameterName";
-
-              return "$parameterName: $parameterValue";
-            }).join(", ")
+          ? "this as ${method.name.pascalCase}"
           : "";
 
       codeBlocs.add(Code(
@@ -55,10 +49,11 @@ class BokehBlocSelectorGenerator extends GeneratorForAnnotation<BlocSelector> {
       ..returns = refer("Stream<$methodName>")
       ..optionalParameters.addAll(protocol.methods.map((method) {
         final ft = FunctionTypeBuilder()
-          ..namedParameters.addIterable(method.parameters,
-              key: (ParameterElement param) => param.name,
-              value: (ParameterElement param) => refer(param.type.displayName))
           ..returnType = refer("Stream<$methodName>");
+
+        if (method.parameters.isNotEmpty) {
+          ft.requiredParameters.add(refer("${method.name.pascalCase}"));
+        }
 
         final paramBuilder = ParameterBuilder()
           ..named = true
