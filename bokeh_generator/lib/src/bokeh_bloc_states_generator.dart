@@ -42,8 +42,9 @@ class BokehBlocStatesGenerator extends GeneratorForAnnotation<BlocStates> {
     ///
     /// Events
     ///
-    eventsClassesBuilders.addAll(
-        commonGenerator.generateProtocolDerivedClasses(protocol, className));
+    eventsClassesBuilders.addAll(commonGenerator.generateProtocolDerivedClasses(
+        protocol, className,
+        addCopyWith: true));
 
     ///
     /// Build classes

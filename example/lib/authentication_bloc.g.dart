@@ -117,6 +117,10 @@ class Idle implements AuthenticationState {
   String toString() {
     return 'Idle []';
   }
+
+  Idle copyWith() {
+    return Idle();
+  }
 }
 
 class Loading implements AuthenticationState {
@@ -134,6 +138,10 @@ class Loading implements AuthenticationState {
 
   String toString() {
     return 'Loading []';
+  }
+
+  Loading copyWith() {
+    return Loading();
   }
 }
 
@@ -154,5 +162,11 @@ class Error implements AuthenticationState {
 
   String toString() {
     return 'Error [\'e\': ${this.e},]';
+  }
+
+  Error copyWith({Exception e}) {
+    return Error(
+      e ?? this.e,
+    );
   }
 }

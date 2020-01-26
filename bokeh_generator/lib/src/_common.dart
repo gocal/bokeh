@@ -49,7 +49,8 @@ class CommonCodeGenerator {
   }
 
   List<ClassBuilder> generateProtocolDerivedClasses(
-      ClassElement protocol, String protocolClassName) {
+      ClassElement protocol, String protocolClassName,
+      {bool addCopyWith = false}) {
     return protocol.methods.map((method) {
       final className = '${method.name.pascalCase}';
 
@@ -77,6 +78,10 @@ class CommonCodeGenerator {
         ..methods.add(generateEqualsMethod(className, method.parameters))
         ..methods.add(generateHashCodeMethod(method.parameters))
         ..methods.add(generateToStringMethod(className, method.parameters));
+
+      if (addCopyWith)
+        eventClassBuilder.methods
+            .add(generateCopyWithMethod(className, method.parameters));
 
       return eventClassBuilder;
     }).toList();
@@ -175,7 +180,7 @@ class CommonCodeGenerator {
   }
 
   Method generateCopyWithMethod(
-      ClassElement clazz, List<ParameterElement> fields) {
+      String className, List<ParameterElement> fields) {
     final params = fields
         .map((field) => ParameterBuilder()
           ..name = field.name
@@ -186,9 +191,8 @@ class CommonCodeGenerator {
     final mb = MethodBuilder()
       ..name = 'copyWith'
       ..optionalParameters.addAll(params)
-      ..returns = refer(clazz.name)
-      ..body = Code(
-          _copyToMethodBody(clazz, fields.map((field) => field.displayName)));
+      ..returns = refer(className)
+      ..body = Code(_copyToMethodBody(className, fields));
 
     return mb.build();
   }
@@ -221,17 +225,23 @@ class CommonCodeGenerator {
 ''';
   }
 
-  String _copyToMethodBody(ClassElement clazz, Iterable<String> fields) {
+  String _copyToMethodBody(String className, List<ParameterElement> fields) {
     final paramsInput = fields.fold(
       "",
-      (r, field) => "$r ${field}: ${field} ?? this.${field},",
+      (r, field) => field.isNamed
+          ? "$r ${field.name}: ${field.name} ?? this.${field.name},"
+          : "$r ${field.name} ?? this.${field.name},",
     );
 
+/*
     final typeParameters = clazz.typeParameters.isEmpty
         ? ''
         : '<' + clazz.typeParameters.map((type) => type.name).join(',') + '>';
+*/
 
-    return '''return ${clazz.name}$typeParameters($paramsInput);''';
+    final typeParameters = "";
+
+    return '''return ${className}$typeParameters($paramsInput);''';
   }
 
   String _toStringBody(String className, Iterable<String> fields) {
