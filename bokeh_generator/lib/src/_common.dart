@@ -1,7 +1,119 @@
 import 'package:analyzer/dart/element/element.dart';
 import 'package:code_builder/code_builder.dart';
+import 'package:recase/recase.dart';
+import 'package:source_gen/source_gen.dart';
 
 class CommonCodeGenerator {
+  ClassBuilder generateProtocolClass(ClassElement protocol, String className) {
+    _assertElementValid(protocol);
+
+    return ClassBuilder()
+      ..abstract = true
+      ..name = className
+      ..methods.addAll(protocol.methods.map((method) {
+        final args = method.parameters.isNotEmpty
+            ? method.parameters.map((parameter) {
+                final parameterName = parameter.name;
+
+                return parameter.isNamed
+                    ? "$parameterName: $parameterName"
+                    : "$parameterName";
+              }).join(", ")
+            : "";
+
+        final builder = MethodBuilder()
+          ..static = true
+          ..name = method.name.camelCase
+          ..lambda = true
+          ..returns = refer(className)
+          ..body = Code('${method.name.pascalCase}($args)')
+          ..requiredParameters.addAll(
+              method.parameters.where((param) => !param.isNamed).map((param) {
+            final paramBuilder = ParameterBuilder()
+              ..named = false
+              ..type = refer(param.type.getDisplayString())
+              ..name = param.name;
+            return paramBuilder.build();
+          }))
+          ..optionalParameters.addAll(
+              method.parameters.where((param) => param.isOptional).map((param) {
+            final paramBuilder = ParameterBuilder()
+              ..named = true
+              ..type = refer(param.type.getDisplayString())
+              ..name = param.name;
+            return paramBuilder.build();
+          }));
+
+        return builder.build();
+      }));
+  }
+
+  List<ClassBuilder> generateProtocolDerivedClasses(
+      ClassElement protocol, String protocolClassName) {
+    return protocol.methods.map((method) {
+      final className = '${method.name.pascalCase}';
+
+      final eventClassBuilder = ClassBuilder()
+        ..name = className
+        ..implements.add(refer(protocolClassName))
+        ..constructors.add((ConstructorBuilder()
+              ..optionalParameters.addAll(method.parameters.map((param) {
+                final builder = ParameterBuilder()
+                  ..name = param.name
+                  ..type = refer(param.type.getDisplayString())
+                  ..named = param.isNamed
+                  ..toThis = true;
+                return builder.build();
+              }))
+              ..constant = true)
+            .build())
+        ..fields.addAll(method.parameters.map((param) {
+          final builder = FieldBuilder()
+            ..name = param.name
+            ..modifier = FieldModifier.final$
+            ..type = refer(param.type.getDisplayString());
+          return builder.build();
+        }))
+        ..methods.add(generateEqualsMethod(className, method.parameters))
+        ..methods.add(generateHashCodeMethod(method.parameters))
+        ..methods.add(generateToStringMethod(className, method.parameters));
+
+      return eventClassBuilder;
+    }).toList();
+  }
+
+  void _assertElementValid(ClassElement element) {
+    // abstract
+    if (element.isAbstract != true) {
+      throw InvalidGenerationSourceError(
+          'The ${element.name} must be abstract');
+    }
+
+    if (element.unnamedConstructor != null &&
+        element.unnamedConstructor.parameters.isNotEmpty) {
+      throw InvalidGenerationSourceError(
+          'The ${element.name}  must not have unnamed constructor');
+    }
+
+    if (element.fields.isNotEmpty) {
+      throw InvalidGenerationSourceError(
+          '@$element.name cannot have parameters');
+    }
+
+    if (element.methods.isEmpty) {
+      throw InvalidGenerationSourceError(
+          '@$element.name need at least one method');
+    }
+
+    element.methods.forEach((method) => {
+          if (!(method.returnType.isDynamic))
+            {
+              throw InvalidGenerationSourceError(
+                  'Wrong return type ${method.returnType} - needs to be dynamic')
+            }
+        });
+  }
+
   Method generateEqualsMethod(String className, List<ParameterElement> fields) {
     MethodBuilder mb = MethodBuilder()
       ..name = 'operator=='

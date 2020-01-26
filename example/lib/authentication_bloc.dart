@@ -14,8 +14,8 @@ abstract class AuthenticationEvents {
 }
 
 /// States
-///@BlocStatesClass()
-abstract class AuthenticationState {
+@BlocStates()
+abstract class AuthenticationStates {
   idle();
   loading();
   error(Exception e);
@@ -29,7 +29,5 @@ class AuthenticationBloc
 
   @override
   Stream<AuthenticationState> mapEventToState(
-      AuthenticationEvent event) async* {
-    AuthenticationEvent.builder.loggedIn();
-  }
+      AuthenticationEvent event) async* {}
 }

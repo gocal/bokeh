@@ -8,7 +8,8 @@ part of 'authentication_bloc.dart';
 
 abstract class AuthenticationEvent {
   static AuthenticationEvent appStarted() => AppStarted();
-  static AuthenticationEvent credentialUpdated({login, password}) =>
+  static AuthenticationEvent credentialUpdated(
+          {String login, String password}) =>
       CredentialUpdated(login: login, password: password);
   static AuthenticationEvent loggedIn() => LoggedIn();
   static AuthenticationEvent loggedOut() => LoggedOut();
@@ -33,7 +34,7 @@ class AppStarted implements AuthenticationEvent {
 }
 
 class CredentialUpdated implements AuthenticationEvent {
-  const CredentialUpdated({this.login, this.password});
+  const CredentialUpdated({String this.login, String this.password});
 
   final String login;
 
@@ -87,5 +88,71 @@ class LoggedOut implements AuthenticationEvent {
 
   String toString() {
     return 'LoggedOut []';
+  }
+}
+
+// **************************************************************************
+// BokehBlocStatesGenerator
+// **************************************************************************
+
+abstract class AuthenticationState {
+  static AuthenticationState idle() => Idle();
+  static AuthenticationState loading() => Loading();
+  static AuthenticationState error(Exception e) => Error(e);
+}
+
+class Idle implements AuthenticationState {
+  const Idle();
+
+  bool operator ==(other) {
+    if (identical(this, other)) return true;
+    if (other is! Idle) return false;
+    return true;
+  }
+
+  int get hashCode {
+    super.hashCode;
+  }
+
+  String toString() {
+    return 'Idle []';
+  }
+}
+
+class Loading implements AuthenticationState {
+  const Loading();
+
+  bool operator ==(other) {
+    if (identical(this, other)) return true;
+    if (other is! Loading) return false;
+    return true;
+  }
+
+  int get hashCode {
+    super.hashCode;
+  }
+
+  String toString() {
+    return 'Loading []';
+  }
+}
+
+class Error implements AuthenticationState {
+  const Error([Exception this.e]);
+
+  final Exception e;
+
+  bool operator ==(other) {
+    if (identical(this, other)) return true;
+    if (other is! Error) return false;
+    return true && this.e == other.e;
+  }
+
+  int get hashCode {
+    return $jf($jc(0, e.hashCode));
+  }
+
+  String toString() {
+    return 'Error [\'e\': ${this.e},]';
   }
 }
