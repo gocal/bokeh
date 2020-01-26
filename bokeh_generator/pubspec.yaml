@@ -1,9 +1,8 @@
 name: bokeh_generator
-version: 0.0.2
-description: >
-  Immutable Data Class Generator
+version: 0.0.3
+description: Bloc Boilerplate generator
 authors:
-- Marcin Marek Gocał <marcin.gocal@gmail.com>
+- Marek Gocał <marcin.gocal@gmail.com>
 homepage: https://github.com/gocal/bokeh.dart
 
 environment:

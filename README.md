@@ -1,59 +1,53 @@
 # Dart Immutable Data Class Builder
 
-Example Model
+Example Authentication Bloc 
 
 ``` dart
+import 'dart:async';
+
+import 'package:bloc/bloc.dart';
 import 'package:bokeh/bokeh.dart';
 
-part 'models.g.dart';
+part 'authentication_bloc.g.dart';
 
-@data
-abstract class User implements _$User {
-  User._();
-  factory User(String name, int age, String weight) = _$User$._;
+@blocEvents
+@BlocSelector(statesClass: AuthenticationStates)
+abstract class AuthenticationEvents {
+  AppStarted(int timestamp);
+  CredentialUpdated({String login, String password = "loremIpsum"});
+  LoggedIn();
+  LoggedOut();
 }
 
-@data
-abstract class Animal implements _$Animal {
-  Animal._();
-  factory Animal(String name) = _$Animal$._;
-} 
+/// States
+@blocStates
+abstract class AuthenticationStates {
+  Idle();
+  Loading();
+  Error(Exception e);
+}
 
-@data
-abstract class Home implements _$Home {
-  Home._();
-  factory Home(User owner, Animal cat) = _$Home$._;
-} 
+/// Bloc
+class AuthenticationBloc
+    extends Bloc<AuthenticationEvent, AuthenticationState> {
+  @override
+  AuthenticationState get initialState => null;
 
-@data
-abstract class Shelter implements _$Shelter {
-  Shelter._();
-  factory Shelter(Animal dog, {Animal cat, Animal mouse}) = _$Shelter$._;
-} 
-```
-
-Example Usage
-
-``` dart
-void main() {
-  
-  // Properties
-  var user = User("Joe Doe", 33, "OK");
-  assert(user.name == "Joe Doe");
-  assert(user.age == 33);
-  assert(user.weight == "OK"); 
-  print(user);
-
-  // Equals
-  var animal = Animal("Dog");
-  assert(animal.name == "Dog");
-  assert(Animal("Dog") == Animal("Dog"));  
-  print(animal);
-  print(animal.hashCode);
-
-  // Named parameters
-  var shelter = Shelter(Animal("doggo"), cat: Animal("Tom"), mouse: Animal("Jerry"));
-  print(shelter);
+  @override
+  Stream<AuthenticationState> mapEventToState(
+      AuthenticationEvent event) async* {
+    yield* event.when(
+        // appStarted
+        appStarted: ({int timestamp}) async* {
+      await Future.delayed(Duration());
+      yield AuthenticationState.idle();
+      yield AuthenticationState.loading();
+    },
+        // credentialUpdated
+        credentialUpdated: ({String login, String password}) async* {
+      await Future.delayed(Duration());
+    });
+  }
 }
 
 ```

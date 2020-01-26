@@ -44,17 +44,3 @@ class AuthenticationBloc
     });
   }
 }
-
-/*
-
-    if (this is AppStarted) {
-      appStarted();
-    } else if (this is LoggedIn) {
-      loggedIn();
-    } else if (this is CredentialUpdated) {
-      credentialUpdated(
-          login: (this as CredentialUpdated).login,
-          password: (this as CredentialUpdated).password);
-    }
-
- */
