@@ -8,6 +8,8 @@ import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:recase/recase.dart';
 
+import '_common.dart';
+
 class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEvents> {
   final emitter = DartEmitter();
   final formatter = DartFormatter();
@@ -26,6 +28,7 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEvents> {
     }
     _assertElementValid(element);
 
+    final commonGenerator = CommonCodeGenerator();
     final protocol = element as ClassElement;
 
     ///
@@ -43,12 +46,22 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEvents> {
       ..abstract = true
       ..name = baseEventClassName
       ..methods.addAll(protocol.methods.map((method) {
+        final args = method.parameters.isNotEmpty
+            ? method.parameters.map((parameter) {
+                final parameterName = parameter.name;
+
+                return parameter.isNamed
+                    ? "$parameterName: $parameterName"
+                    : "$parameterName";
+              }).join(", ")
+            : "";
+
         final builder = MethodBuilder()
           ..static = true
-          ..name = method.name.pascalCase
+          ..name = method.name.camelCase
           ..lambda = true
           ..returns = refer(baseEventClassName)
-          ..body = Code("null")
+          ..body = Code('${method.name.pascalCase}($args)')
           ..optionalParameters.addAll(
               method.parameters.where((param) => param.isNamed).map((param) {
             final paramBuilder = ParameterBuilder()
@@ -71,29 +84,30 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEvents> {
       final className = '${name.pascalCase}';
 
       final eventClassBuilder = ClassBuilder()
-            ..name = className
-            ..implements.add(refer(baseEventClassName))
-            ..constructors.add((ConstructorBuilder()
-                  ..optionalParameters.addAll(method.parameters.map((param) {
-                    final builder = ParameterBuilder()
-                      ..name = param.name
-                      ..named = true
-                      ..toThis = true;
-                    return builder.build();
-                  }))
-                  ..constant = true)
-                .build())
-            ..fields.addAll(method.parameters.map((param) {
-              final builder = FieldBuilder()
-                ..name = param.name
-                ..modifier = FieldModifier.final$
-                ..type = refer(param.type.displayName);
-              return builder.build();
-            }))
-          //..methods.add(_generateEqualsMethod(className, method.parameters))
-          //..methods.add(_generateHashCodeMethod(method.parameters))
-          //..methods.add(_generateToStringMethod(className, method.parameters))
-          ;
+        ..name = className
+        ..implements.add(refer(baseEventClassName))
+        ..constructors.add((ConstructorBuilder()
+              ..optionalParameters.addAll(method.parameters.map((param) {
+                final builder = ParameterBuilder()
+                  ..name = param.name
+                  ..named = true
+                  ..toThis = true;
+                return builder.build();
+              }))
+              ..constant = true)
+            .build())
+        ..fields.addAll(method.parameters.map((param) {
+          final builder = FieldBuilder()
+            ..name = param.name
+            ..modifier = FieldModifier.final$
+            ..type = refer(param.type.getDisplayString());
+          return builder.build();
+        }))
+        ..methods.add(
+            commonGenerator.generateEqualsMethod(className, method.parameters))
+        ..methods.add(commonGenerator.generateHashCodeMethod(method.parameters))
+        ..methods.add(commonGenerator.generateToStringMethod(
+            className, method.parameters));
 
       eventsClassesBuilders.add(eventClassBuilder);
     });
@@ -140,133 +154,5 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEvents> {
                   'Wrong return type ${method.returnType} - needs to be dynamic')
             }
         });
-  }
-
-  Method _generateEqualsMethod(
-      String className, List<ParameterElement> fields) {
-    MethodBuilder mb = MethodBuilder()
-      ..name = 'operator=='
-      ..requiredParameters.add((ParameterBuilder()..name = 'other').build())
-      ..returns = refer('bool')
-      ..body = Code(
-        _equalsBody(
-          className,
-          Map.fromIterable(fields,
-              key: (element) => element.displayName,
-              value: (element) => _hasDeepCollectionEquality(element)),
-        ),
-      );
-
-    return mb.build();
-  }
-
-  bool _hasDeepCollectionEquality(ParameterElement fieldElement) {
-    /*
-    final collectionAnnotation =
-        TypeChecker.fromRuntime(Collection).firstAnnotationOf(fieldElement);
-
-    if (collectionAnnotation == null)
-      return false;
-    else {
-      return collectionAnnotation.getField('deepEquality').toBoolValue();
-    }
-    */
-    return false;
-  }
-
-  Method _generateHashCodeMethod(List<ParameterElement> fields) {
-    String body;
-
-    if (fields.isEmpty) {
-      body = """
- super.hashCode;
-            """;
-    } else {
-      var hashString = "0";
-
-      for (int i = 0; i < fields.length; i++) {
-        var param = fields[i];
-        hashString = "\$jc($hashString, ${param.name}.hashCode)";
-      }
-
-      body = """
-          return \$jf($hashString);
-        """;
-    }
-
-    final builder = MethodBuilder()
-      ..name = 'hashCode'
-      ..type = MethodType.getter
-      ..returns = refer('int')
-      ..body = Code(body);
-
-    return builder.build();
-  }
-
-  Method _generateCopyWithMethod(
-      ClassElement clazz, List<ParameterElement> fields) {
-    final params = fields
-        .map((field) => ParameterBuilder()
-          ..name = field.name
-          ..type = refer(field.type.displayName)
-          ..named = true)
-        .map((paramBuilder) => paramBuilder.build());
-
-    final mb = MethodBuilder()
-      ..name = 'copyWith'
-      ..optionalParameters.addAll(params)
-      ..returns = refer(clazz.name)
-      ..body = Code(
-          _copyToMethodBody(clazz, fields.map((field) => field.displayName)));
-
-    return mb.build();
-  }
-
-  Method _generateToStringMethod(
-      String className, List<ParameterElement> fields) {
-    final mb = MethodBuilder()
-      ..name = 'toString'
-      ..returns = refer('String')
-      ..body = Code(
-          _toStringBody(className, fields.map((field) => field.displayName)));
-
-    return mb.build();
-  }
-
-  String _equalsBody(String className, Map<String, bool> fields) {
-    final fieldEquals = fields.entries.fold<String>('true', (value, element) {
-      final hasDeepCollectionEquality = element.value;
-      if (hasDeepCollectionEquality) {
-        return '$value && DeepCollectionEquality().equals(this.${element.key},other.${element.key})';
-      } else {
-        return '$value && this.${element.key} == other.${element.key}';
-      }
-    });
-
-    return '''
-  if (identical(this, other)) return true;
-  if (other is! $className) return false;
-  return $fieldEquals;
-''';
-  }
-
-  String _copyToMethodBody(ClassElement clazz, Iterable<String> fields) {
-    final paramsInput = fields.fold(
-      "",
-      (r, field) => "$r ${field}: ${field} ?? this.${field},",
-    );
-
-    final typeParameters = clazz.typeParameters.isEmpty
-        ? ''
-        : '<' + clazz.typeParameters.map((type) => type.name).join(',') + '>';
-
-    return '''return ${clazz.name}$typeParameters($paramsInput);''';
-  }
-
-  String _toStringBody(String className, Iterable<String> fields) {
-    final fieldsToString =
-        fields.fold('', (r, field) => r + '\\\'$field\\\': \${this.$field},');
-
-    return "return '$className [$fieldsToString]';";
   }
 }
