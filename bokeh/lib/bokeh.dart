@@ -1,12 +1,12 @@
 library bokeh;
 
-class BlocEventsClass {
-  final Type event;
-  const BlocEventsClass({this.event});
+class BlocEvents {
+  final String className;
+  const BlocEvents({this.className});
 }
 
-class BlocStatesClass {
-  const BlocStatesClass();
+class BlocStates {
+  const BlocStates();
 }
 
 class BlocClass {

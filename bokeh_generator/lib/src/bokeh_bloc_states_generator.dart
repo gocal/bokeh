@@ -7,7 +7,7 @@ import 'package:bokeh/bokeh.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 
-class BokehBlocStatesGenerator extends GeneratorForAnnotation<BlocStatesClass> {
+class BokehBlocStatesGenerator extends GeneratorForAnnotation<BlocStates> {
   final emitter = DartEmitter();
   final formatter = DartFormatter();
   final annotationName = "BlocStatesClass";

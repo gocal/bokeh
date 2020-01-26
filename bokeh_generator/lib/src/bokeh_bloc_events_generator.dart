@@ -8,7 +8,7 @@ import 'package:code_builder/code_builder.dart';
 import 'package:dart_style/dart_style.dart';
 import 'package:recase/recase.dart';
 
-class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEventsClass> {
+class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEvents> {
   final emitter = DartEmitter();
   final formatter = DartFormatter();
   final annotationName = "BlocEventsClass";
@@ -24,59 +24,83 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEventsClass> {
         '@$annotationName anontation must be used on class element',
       );
     }
-
-    final events = element as ClassElement;
-
-    final eventType = annotation.read("event").typeValue;
-
-    final eventsClassesBuilders = List<ClassBuilder>();
-
     _assertElementValid(element);
 
-    events.methods.forEach((method) {
+    final protocol = element as ClassElement;
+
+    ///
+    /// Classes
+    ///
+    final eventsClassesBuilders = List<ClassBuilder>();
+
+    ///
+    /// Base event class
+    ///
+    final baseEventClassName = annotation.peek("className")?.stringValue ??
+        protocol.displayName.substring(0, protocol.displayName.length - 1);
+
+    final baseClassBuilder = ClassBuilder()
+      ..abstract = true
+      ..name = baseEventClassName
+      ..methods.addAll(protocol.methods.map((method) {
+        final builder = MethodBuilder()
+          ..static = true
+          ..name = method.name.pascalCase
+          ..lambda = true
+          ..returns = refer(baseEventClassName)
+          ..body = Code("null")
+          ..optionalParameters.addAll(
+              method.parameters.where((param) => param.isNamed).map((param) {
+            final paramBuilder = ParameterBuilder()
+              ..named = true
+              ..name = param.name;
+            return paramBuilder.build();
+          }));
+
+        return builder.build();
+      }));
+
+    eventsClassesBuilders.add(baseClassBuilder);
+
+    ///
+    /// Events
+    ///
+    protocol.methods.forEach((method) {
       final String name = method.name;
 
-      final className = '${name.pascalCase}_${eventType.getDisplayString()}';
+      final className = '${name.pascalCase}';
 
-      final equalsMethod = _generateEqualsMethod(className, method.parameters);
-      final hashCodeMethod = _generateHashCodeMethod(method.parameters);
-      final toStringMethod =
-          _generateToStringMethod(className, method.parameters);
+      final eventClassBuilder = ClassBuilder()
+            ..name = className
+            ..implements.add(refer(baseEventClassName))
+            ..constructors.add((ConstructorBuilder()
+                  ..optionalParameters.addAll(method.parameters.map((param) {
+                    final builder = ParameterBuilder()
+                      ..name = param.name
+                      ..named = true
+                      ..toThis = true;
+                    return builder.build();
+                  }))
+                  ..constant = true)
+                .build())
+            ..fields.addAll(method.parameters.map((param) {
+              final builder = FieldBuilder()
+                ..name = param.name
+                ..modifier = FieldModifier.final$
+                ..type = refer(param.type.displayName);
+              return builder.build();
+            }))
+          //..methods.add(_generateEqualsMethod(className, method.parameters))
+          //..methods.add(_generateHashCodeMethod(method.parameters))
+          //..methods.add(_generateToStringMethod(className, method.parameters))
+          ;
 
-      final eventBuilder = ClassBuilder()
-        ..name = className
-        ..implements.add(refer(eventType.displayName))
-        ..constructors.add((ConstructorBuilder()
-              ..optionalParameters.addAll(method.parameters.map((param) {
-                final builder = ParameterBuilder()
-                  ..name = param.name
-                  ..named = true
-                  ..toThis = true;
-                return builder.build();
-              }))
-              ..constant = true)
-            .build())
-        ..fields.addAll(method.parameters.map((param) {
-          final builder = FieldBuilder()
-            ..name = param.name
-            ..modifier = FieldModifier.final$
-            ..type = refer(param.type.displayName);
-          return builder.build();
-        }))
-        ..methods.add(equalsMethod)
-        ..methods.add(hashCodeMethod)
-        ..methods.add(toStringMethod);
-
-      eventsClassesBuilders.add(eventBuilder);
+      eventsClassesBuilders.add(eventClassBuilder);
     });
 
-    final partialClass = ClassBuilder()
-      ..name = '_\$${element.name}'
-      ..constructors.add((ConstructorBuilder()..constant = true).build())
-      ..types.addAll(events.typeParameters
-          .map((typeParam) => refer(typeParam.displayName)))
-      ..abstract = true;
-
+    ///
+    /// Build classes
+    ///
     final stringBuilder = StringBuffer();
     eventsClassesBuilders.forEach((builder) {
       stringBuilder.write(builder.build().accept(emitter).toString());

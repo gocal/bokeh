@@ -5,10 +5,7 @@ import 'package:bokeh/bokeh.dart';
 
 part 'authentication_bloc.g.dart';
 
-/// Events
-abstract class AuthenticationEvent {}
-
-@BlocEventsClass(event: AuthenticationEvent)
+@BlocEvents()
 abstract class AuthenticationEvents {
   appStarted();
   credentialUpdated({String login, String password});
@@ -32,5 +29,7 @@ class AuthenticationBloc
 
   @override
   Stream<AuthenticationState> mapEventToState(
-      AuthenticationEvent event) async* {}
+      AuthenticationEvent event) async* {
+    AuthenticationEvent.builder.loggedIn();
+  }
 }
