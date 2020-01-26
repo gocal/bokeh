@@ -6,6 +6,9 @@ import 'package:bokeh/bokeh.dart';
 
 part 'authentication_bloc.g.dart';
 
+///
+/// Events
+///
 @blocEvents
 @BlocSelector(statesClass: AuthenticationStates)
 abstract class AuthenticationEvents {
@@ -15,7 +18,9 @@ abstract class AuthenticationEvents {
   LoggedOut();
 }
 
+///
 /// States
+///
 @blocStates
 abstract class AuthenticationStates {
   Idle();
@@ -23,7 +28,9 @@ abstract class AuthenticationStates {
   Error(Exception e);
 }
 
+///
 /// Bloc
+///
 class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
   @override

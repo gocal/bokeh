@@ -5,11 +5,15 @@ Example Authentication Bloc
 ``` dart
 import 'dart:async';
 
+import 'package:meta/meta.dart';
 import 'package:bloc/bloc.dart';
 import 'package:bokeh/bokeh.dart';
 
 part 'authentication_bloc.g.dart';
 
+///
+/// Events
+///
 @blocEvents
 @BlocSelector(statesClass: AuthenticationStates)
 abstract class AuthenticationEvents {
@@ -19,7 +23,9 @@ abstract class AuthenticationEvents {
   LoggedOut();
 }
 
+///
 /// States
+///
 @blocStates
 abstract class AuthenticationStates {
   Idle();
@@ -27,7 +33,9 @@ abstract class AuthenticationStates {
   Error(Exception e);
 }
 
+///
 /// Bloc
+///
 class AuthenticationBloc
     extends Bloc<AuthenticationEvent, AuthenticationState> {
   @override
@@ -37,17 +45,23 @@ class AuthenticationBloc
   Stream<AuthenticationState> mapEventToState(
       AuthenticationEvent event) async* {
     yield* event.when(
-        // appStarted
-        appStarted: ({int timestamp}) async* {
-      await Future.delayed(Duration());
-      yield AuthenticationState.idle();
-      yield AuthenticationState.loading();
-    },
-        // credentialUpdated
-        credentialUpdated: ({String login, String password}) async* {
-      await Future.delayed(Duration());
-    });
+      //
+      appStarted: (event) async* {
+        await Future.delayed(Duration());
+        yield AuthenticationState.idle();
+        yield AuthenticationState.loading();
+      },
+      //
+      credentialUpdated: (event) async* {
+        await Future.delayed(Duration());
+      },
+
+      //
+      loggedOut: () async* {
+        yield AuthenticationState.idle();
+      },
+      loggedIn: () async* {},
+    );
   }
 }
-
 ```

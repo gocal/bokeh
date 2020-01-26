@@ -179,15 +179,10 @@ class Error implements AuthenticationState {
 
 extension AuthenticationEventExtension on AuthenticationEvent {
   Stream<AuthenticationState> when(
-      {@required
-          Stream<AuthenticationState> Function(AppStarted) appStarted,
-      @required
-          Stream<AuthenticationState> Function(CredentialUpdated)
-              credentialUpdated,
-      @required
-          Stream<AuthenticationState> Function() loggedIn,
-      @required
-          Stream<AuthenticationState> Function() loggedOut}) async* {
+      {Stream<AuthenticationState> Function(AppStarted) appStarted,
+      Stream<AuthenticationState> Function(CredentialUpdated) credentialUpdated,
+      Stream<AuthenticationState> Function() loggedIn,
+      Stream<AuthenticationState> Function() loggedOut}) async* {
     if (this is AppStarted) {
       yield* appStarted(this as AppStarted);
       return;
