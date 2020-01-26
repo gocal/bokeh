@@ -23,7 +23,7 @@ abstract class AuthenticationEvents {
 @blocStates
 abstract class AuthenticationStates {
   Idle();
-  Loading();
+  Loading({int progress, String message});
   Error(Exception e);
 }
 
@@ -41,9 +41,14 @@ class AuthenticationBloc
     yield* event.when(
       //
       appStarted: (event) async* {
+        final current = state as Loading;
+
+        yield current.copyWith(progress: 20);
+
         await Future.delayed(Duration());
         yield AuthenticationState.idle();
         yield AuthenticationState.loading();
+        yield AuthenticationState.loading(progress: 200);
       },
       //
       credentialUpdated: (event) async* {

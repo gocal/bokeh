@@ -99,7 +99,8 @@ class LoggedOut implements AuthenticationEvent {
 
 abstract class AuthenticationState {
   static AuthenticationState idle() => Idle();
-  static AuthenticationState loading() => Loading();
+  static AuthenticationState loading({int progress, String message}) =>
+      Loading(progress: progress, message: message);
   static AuthenticationState error(Exception e) => Error(e);
 }
 
@@ -126,24 +127,33 @@ class Idle implements AuthenticationState {
 }
 
 class Loading implements AuthenticationState {
-  const Loading();
+  const Loading({int this.progress, String this.message});
+
+  final int progress;
+
+  final String message;
 
   bool operator ==(other) {
     if (identical(this, other)) return true;
     if (other is! Loading) return false;
-    return true;
+    return true &&
+        this.progress == other.progress &&
+        this.message == other.message;
   }
 
   int get hashCode {
-    super.hashCode;
+    return $jf($jc($jc(0, progress.hashCode), message.hashCode));
   }
 
   String toString() {
-    return 'Loading []';
+    return 'Loading [\'progress\': ${this.progress},\'message\': ${this.message},]';
   }
 
-  Loading copyWith() {
-    return Loading();
+  Loading copyWith({int progress, String message}) {
+    return Loading(
+      progress: progress ?? this.progress,
+      message: message ?? this.message,
+    );
   }
 }
 
