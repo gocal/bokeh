@@ -10,10 +10,6 @@ import 'package:dart_style/dart_style.dart';
 import '_common.dart';
 
 class BokehBlocStatesGenerator extends GeneratorForAnnotation<BlocStates> {
-  final emitter = DartEmitter();
-  final formatter = DartFormatter();
-  final annotationName = "BlocStatesClass";
-
   @override
   FutureOr<String> generateForAnnotatedElement(
     Element element,

@@ -5,20 +5,21 @@ import 'package:bokeh/bokeh.dart';
 
 part 'authentication_bloc.g.dart';
 
-@BlocEvents()
+@blocEvents
+@BlocSelector(statesClass: AuthenticationStates)
 abstract class AuthenticationEvents {
-  appStarted();
-  credentialUpdated({String login, String password});
-  loggedIn();
-  loggedOut();
+  AppStarted(int timestamp);
+  CredentialUpdated({String login, String password = "loremIpsum"});
+  LoggedIn();
+  LoggedOut();
 }
 
 /// States
-@BlocStates()
+@blocStates
 abstract class AuthenticationStates {
-  idle();
-  loading();
-  error(Exception e);
+  Idle();
+  Loading();
+  Error(Exception e);
 }
 
 /// Bloc
@@ -29,5 +30,31 @@ class AuthenticationBloc
 
   @override
   Stream<AuthenticationState> mapEventToState(
-      AuthenticationEvent event) async* {}
+      AuthenticationEvent event) async* {
+    yield* event.when(
+        // appStarted
+        appStarted: ({int timestamp}) async* {
+      await Future.delayed(Duration());
+      yield AuthenticationState.idle();
+      yield AuthenticationState.loading();
+    },
+        // credentialUpdated
+        credentialUpdated: ({String login, String password}) async* {
+      await Future.delayed(Duration());
+    });
+  }
 }
+
+/*
+
+    if (this is AppStarted) {
+      appStarted();
+    } else if (this is LoggedIn) {
+      loggedIn();
+    } else if (this is CredentialUpdated) {
+      credentialUpdated(
+          login: (this as CredentialUpdated).login,
+          password: (this as CredentialUpdated).password);
+    }
+
+ */

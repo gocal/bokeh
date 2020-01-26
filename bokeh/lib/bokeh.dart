@@ -1,5 +1,8 @@
 library bokeh;
 
+const blocEvents = BlocEvents();
+const blocStates = BlocStates();
+
 class BlocEvents {
   final String className;
   const BlocEvents({this.className});
@@ -9,11 +12,9 @@ class BlocStates {
   const BlocStates();
 }
 
-class BlocClass {
-  final Type state;
-  final Type event;
-
-  const BlocClass({this.state, this.event});
+class BlocSelector {
+  final Type statesClass;
+  const BlocSelector({this.statesClass});
 }
 
 /// Jenkins Hash Functions

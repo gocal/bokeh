@@ -7,7 +7,7 @@ part of 'authentication_bloc.dart';
 // **************************************************************************
 
 abstract class AuthenticationEvent {
-  static AuthenticationEvent appStarted() => AppStarted();
+  static AuthenticationEvent appStarted(int timestamp) => AppStarted(timestamp);
   static AuthenticationEvent credentialUpdated(
           {String login, String password}) =>
       CredentialUpdated(login: login, password: password);
@@ -16,20 +16,22 @@ abstract class AuthenticationEvent {
 }
 
 class AppStarted implements AuthenticationEvent {
-  const AppStarted();
+  const AppStarted([int this.timestamp]);
+
+  final int timestamp;
 
   bool operator ==(other) {
     if (identical(this, other)) return true;
     if (other is! AppStarted) return false;
-    return true;
+    return true && this.timestamp == other.timestamp;
   }
 
   int get hashCode {
-    super.hashCode;
+    return $jf($jc(0, timestamp.hashCode));
   }
 
   String toString() {
-    return 'AppStarted []';
+    return 'AppStarted [\'timestamp\': ${this.timestamp},]';
   }
 }
 
@@ -169,4 +171,17 @@ class Error implements AuthenticationState {
       e ?? this.e,
     );
   }
+}
+
+// **************************************************************************
+// BokehBlocSelectorGenerator
+// **************************************************************************
+
+extension AuthenticationEventExtension on AuthenticationEvent {
+  Stream<AuthenticationState> when(
+      {Stream<AuthenticationState> Function({int timestamp}) appStarted,
+      Stream<AuthenticationState> Function({String login, String password})
+          credentialUpdated,
+      Stream<AuthenticationState> Function() loggedIn,
+      Stream<AuthenticationState> Function() loggedOut}) {}
 }
