@@ -9,7 +9,7 @@ import 'package:dart_style/dart_style.dart';
 
 import '_common.dart';
 
-class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEvents> {
+class BokehProtocolGenerator extends GeneratorForAnnotation<Protocol> {
   @override
   FutureOr<String> generateForAnnotatedElement(
     Element element,
@@ -22,7 +22,7 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEvents> {
       );
     }
 
-    final commonGenerator = CommonCodeGenerator();
+    final commonGenerator = BokehGenerator();
     final protocol = element as ClassElement;
     final eventsClassesBuilders = List<ClassBuilder>();
 
@@ -38,18 +38,18 @@ class BokehBlocEventsGenerator extends GeneratorForAnnotation<BlocEvents> {
     ///
     /// Events
     ///
-    eventsClassesBuilders.addAll(
-        commonGenerator.generateProtocolDerivedClasses(protocol, className));
+    eventsClassesBuilders.addAll(commonGenerator.generateProtocolDerivedClasses(
+        protocol, className,
+        addCopyWith: true));
 
     ///
     /// Build classes
     ///
-    final emitter = DartEmitter();
-    final formatter = DartFormatter();
     final stringBuilder = StringBuffer();
+    final emitter = DartEmitter();
     eventsClassesBuilders.forEach((builder) {
       stringBuilder.write(builder.build().accept(emitter).toString());
     });
-    return formatter.format(stringBuilder.toString());
+    return DartFormatter().format(stringBuilder.toString());
   }
 }

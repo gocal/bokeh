@@ -3,7 +3,7 @@ import 'package:code_builder/code_builder.dart';
 import 'package:recase/recase.dart';
 import 'package:source_gen/source_gen.dart';
 
-class CommonCodeGenerator {
+class BokehGenerator {
   ClassBuilder generateProtocolClass(ClassElement protocol, String className) {
     _assertElementValid(protocol);
 

@@ -9,7 +9,7 @@ import 'package:dart_style/dart_style.dart';
 
 import 'package:recase/recase.dart';
 
-class BokehBlocSelectorGenerator extends GeneratorForAnnotation<BlocSelector> {
+class BokehSelectorGenerator extends GeneratorForAnnotation<Selector> {
   @override
   FutureOr<String> generateForAnnotatedElement(
     Element element,

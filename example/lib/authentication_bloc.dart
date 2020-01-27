@@ -6,10 +6,19 @@ import 'package:bokeh/bokeh.dart';
 part 'authentication_bloc.g.dart';
 
 ///
+/// Model
+///
+@data
+abstract class _Employee {
+  double x;
+  double y;
+}
+
+///
 /// Events
 ///
-@blocEvents
-@BlocSelector(statesClass: AuthenticationStates)
+@protocol
+@Selector(statesClass: AuthenticationStates)
 abstract class AuthenticationEvents {
   AppStarted(int timestamp);
   CredentialUpdated({String login, String password = "loremIpsum"});
@@ -20,7 +29,7 @@ abstract class AuthenticationEvents {
 ///
 /// States
 ///
-@blocStates
+@protocol
 abstract class AuthenticationStates {
   Idle();
   Loading({int progress, String message});

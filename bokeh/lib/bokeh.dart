@@ -1,20 +1,33 @@
 library bokeh;
 
-const blocEvents = BlocEvents();
-const blocStates = BlocStates();
+const protocol = Protocol();
+const data = Data();
+const selector = Selector();
 
-class BlocEvents {
+class Data extends _BohehAnnotation {
   final String className;
-  const BlocEvents({this.className});
+  const Data({this.className, String prefix, String suffix})
+      : super(prefix: prefix, suffix: suffix);
 }
 
-class BlocStates {
-  const BlocStates();
+class Protocol extends _BohehAnnotation {
+  final String className;
+  final bool copyWith;
+  const Protocol({this.className, this.copyWith, String prefix, String suffix})
+      : super(prefix: prefix, suffix: suffix);
 }
 
-class BlocSelector {
+class Selector extends _BohehAnnotation {
   final Type statesClass;
-  const BlocSelector({this.statesClass});
+  const Selector({this.statesClass, String prefix, String suffix})
+      : super(prefix: prefix, suffix: suffix);
+}
+
+class _BohehAnnotation {
+  final String prefix;
+  final String suffix;
+
+  const _BohehAnnotation({this.prefix = "_", this.suffix = ""});
 }
 
 /// Jenkins Hash Functions
