@@ -26,7 +26,7 @@ abstract class _AuthenticationState {
 @BlocOf(state: _AuthenticationState, event: _AuthenticationEvent)
 class AuthenticationBloc extends Bloc<AuthenticationEvent, AuthenticationState> {
   @override
-  AuthenticationState get initialState => AuthenticationState.;
+  AuthenticationState get initialState => AuthenticationState.idle();
 
   @override
   Stream<AuthenticationState> mapEventToState(AuthenticationEvent event) async* {
