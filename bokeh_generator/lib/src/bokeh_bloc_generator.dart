@@ -22,36 +22,35 @@ class BokehBlocGenerator extends GeneratorForAnnotation<BlocOf> {
         '@${annotation} anontation must be used on class element',
       );
     }
-    
-    final protocol = annotation.read("event").typeValue as InterfaceType;
-    final statesProtocol = annotation.read("state").typeValue as InterfaceType;
 
-    final protocolName =
-        protocol.displayName.substring(1);
+    final protocol = annotation.read('event').typeValue as InterfaceType;
+    final statesProtocol = annotation.read('state').typeValue as InterfaceType;
 
-    final methodName = statesProtocol.displayName.substring(1);
+    final protocolName = protocol.getDisplayString().substring(1);
+
+    final methodName = statesProtocol.getDisplayString().substring(1);
     final methodBuilder = MethodBuilder();
 
-    final codeBlocs = List<Code>();
+    final codeBlocs = <Code>[];
     protocol.methods.forEach((method) {
       final args = method.parameters.isNotEmpty
-          ? "this as ${method.name.pascalCase}"
-          : "";
+          ? 'this as ${method.name.pascalCase}'
+          : '';
 
       codeBlocs.add(Code(
           '''if(this is ${method.name.pascalCase}) { yield* ${method.name.camelCase}($args); return; }'''));
     });
 
     methodBuilder
-      ..name = "when"
+      ..name = 'when'
       ..modifier = MethodModifier.asyncStar
-      ..returns = refer("Stream<$methodName>")
+      ..returns = refer('Stream<$methodName>')
       ..optionalParameters.addAll(protocol.methods.map((method) {
         final ft = FunctionTypeBuilder()
-          ..returnType = refer("Stream<$methodName>");
+          ..returnType = refer('Stream<$methodName>');
 
         if (method.parameters.isNotEmpty) {
-          ft.requiredParameters.add(refer("${method.name.pascalCase}"));
+          ft.requiredParameters.add(refer('${method.name.pascalCase}'));
         }
 
         final paramBuilder = ParameterBuilder()
@@ -70,9 +69,9 @@ class BokehBlocGenerator extends GeneratorForAnnotation<BlocOf> {
     final formatter = DartFormatter();
     final stringBuilder = StringBuffer();
     stringBuilder
-        .write("extension ${protocolName}Extension on ${protocolName} {");
+        .write('extension ${protocolName}Extension on ${protocolName} {');
     stringBuilder.write(methodBuilder.build().accept(emitter).toString());
-    stringBuilder.write("}");
+    stringBuilder.write('}');
 
     return formatter.format(stringBuilder.toString());
   }

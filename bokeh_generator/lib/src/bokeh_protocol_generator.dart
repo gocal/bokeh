@@ -24,12 +24,12 @@ class BokehProtocolGenerator extends GeneratorForAnnotation<Protocol> {
 
     final commonGenerator = BokehGenerator();
     final protocol = element as ClassElement;
-    final eventsClassesBuilders = List<ClassBuilder>();
+    final eventsClassesBuilders = <ClassBuilder>[];
 
     ///
     /// Base event class
     ///
-    final className = annotation.peek("className")?.stringValue ??
+    final className = annotation.peek('className')?.stringValue ??
         protocol.displayName.substring(1);
 
     eventsClassesBuilders

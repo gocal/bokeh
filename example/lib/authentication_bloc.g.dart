@@ -26,12 +26,12 @@ class AppStarted implements AuthenticationEvent {
     return true && this.timestamp == other.timestamp;
   }
 
-  int get hashCode {
-    return $jf($jc(0, timestamp.hashCode));
-  }
-
   String toString() {
     return 'AppStarted [\'timestamp\': ${this.timestamp},]';
+  }
+
+  int get hashCode {
+    return $jf($jc(0, timestamp.hashCode));
   }
 
   AppStarted copyWith({int timestamp}) {
@@ -54,12 +54,12 @@ class CredentialUpdated implements AuthenticationEvent {
     return true && this.login == other.login && this.password == other.password;
   }
 
-  int get hashCode {
-    return $jf($jc($jc(0, login.hashCode), password.hashCode));
-  }
-
   String toString() {
     return 'CredentialUpdated [\'login\': ${this.login},\'password\': ${this.password},]';
+  }
+
+  int get hashCode {
+    return $jf($jc($jc(0, login.hashCode), password.hashCode));
   }
 
   CredentialUpdated copyWith({String login, String password}) {
@@ -79,10 +79,6 @@ class LoggedIn implements AuthenticationEvent {
     return true;
   }
 
-  int get hashCode {
-    super.hashCode;
-  }
-
   String toString() {
     return 'LoggedIn []';
   }
@@ -99,10 +95,6 @@ class LoggedOut implements AuthenticationEvent {
     if (identical(this, other)) return true;
     if (other is! LoggedOut) return false;
     return true;
-  }
-
-  int get hashCode {
-    super.hashCode;
   }
 
   String toString() {
@@ -130,10 +122,6 @@ class Idle implements AuthenticationState {
     return true;
   }
 
-  int get hashCode {
-    super.hashCode;
-  }
-
   String toString() {
     return 'Idle []';
   }
@@ -158,12 +146,12 @@ class Loading implements AuthenticationState {
         this.message == other.message;
   }
 
-  int get hashCode {
-    return $jf($jc($jc(0, progress.hashCode), message.hashCode));
-  }
-
   String toString() {
     return 'Loading [\'progress\': ${this.progress},\'message\': ${this.message},]';
+  }
+
+  int get hashCode {
+    return $jf($jc($jc(0, progress.hashCode), message.hashCode));
   }
 
   Loading copyWith({int progress, String message}) {
@@ -185,12 +173,12 @@ class Error implements AuthenticationState {
     return true && this.e == other.e;
   }
 
-  int get hashCode {
-    return $jf($jc(0, e.hashCode));
-  }
-
   String toString() {
     return 'Error [\'e\': ${this.e},]';
+  }
+
+  int get hashCode {
+    return $jf($jc(0, e.hashCode));
   }
 
   Error copyWith({Exception e}) {

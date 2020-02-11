@@ -16,10 +16,10 @@ class BokehGenerator {
                 final parameterName = parameter.name;
 
                 return parameter.isNamed
-                    ? "$parameterName: $parameterName"
-                    : "$parameterName";
-              }).join(", ")
-            : "";
+                    ? '$parameterName: $parameterName'
+                    : '$parameterName';
+              }).join(', ')
+            : '';
 
         final builder = MethodBuilder()
           ..static = true
@@ -83,9 +83,10 @@ class BokehGenerator {
             .add(_generateHashCodeMethod(method.parameters));
       }
 
-      if (addCopyWith)
+      if (addCopyWith) {
         eventClassBuilder.methods
             .add(_generateCopyWithMethod(className, method.parameters));
+      }
 
       return eventClassBuilder;
     }).toList();
@@ -125,16 +126,17 @@ class BokehGenerator {
 
   Method _generateEqualsMethod(
       String className, List<ParameterElement> fields) {
-    MethodBuilder mb = MethodBuilder()
+    final mb = MethodBuilder()
       ..name = 'operator=='
       ..requiredParameters.add((ParameterBuilder()..name = 'other').build())
       ..returns = refer('bool')
       ..body = Code(
         _equalsBody(
           className,
-          Map.fromIterable(fields,
-              key: (element) => element.displayName,
-              value: (element) => _hasDeepCollectionEquality(element)),
+          {
+            for (var element in fields)
+              element.displayName: _hasDeepCollectionEquality(element)
+          },
         ),
       );
 
@@ -156,16 +158,16 @@ class BokehGenerator {
   }
 
   Method _generateHashCodeMethod(List<ParameterElement> fields) {
-    var hashString = "0";
+    var hashString = '0';
 
-    for (int i = 0; i < fields.length; i++) {
+    for (var i = 0; i < fields.length; i++) {
       var param = fields[i];
-      hashString = "\$jc($hashString, ${param.name}.hashCode)";
+      hashString = '\$jc($hashString, ${param.name}.hashCode)';
     }
 
-    final body = """
+    final body = '''
           return \$jf($hashString);
-        """;
+        ''';
 
     final builder = MethodBuilder()
       ..name = 'hashCode'
@@ -181,7 +183,7 @@ class BokehGenerator {
     final params = fields
         .map((field) => ParameterBuilder()
           ..name = field.name
-          ..type = refer(field.type.displayName)
+          ..type = refer(field.type.getDisplayString())
           ..named = true)
         .map((paramBuilder) => paramBuilder.build());
 
@@ -224,10 +226,10 @@ class BokehGenerator {
 
   String _copyToMethodBody(String className, List<ParameterElement> fields) {
     final paramsInput = fields.fold(
-      "",
+      '',
       (r, field) => field.isNamed
-          ? "$r ${field.name}: ${field.name} ?? this.${field.name},"
-          : "$r ${field.name} ?? this.${field.name},",
+          ? '$r ${field.name}: ${field.name} ?? this.${field.name},'
+          : '$r ${field.name} ?? this.${field.name},',
     );
 
 /*
@@ -236,7 +238,7 @@ class BokehGenerator {
         : '<' + clazz.typeParameters.map((type) => type.name).join(',') + '>';
 */
 
-    final typeParameters = "";
+    final typeParameters = '';
 
     return '''return ${className}$typeParameters($paramsInput);''';
   }
