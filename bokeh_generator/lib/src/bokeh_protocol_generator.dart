@@ -30,7 +30,7 @@ class BokehProtocolGenerator extends GeneratorForAnnotation<Protocol> {
     /// Base event class
     ///
     final className = annotation.peek("className")?.stringValue ??
-        protocol.displayName.substring(0, protocol.displayName.length - 1);
+        protocol.displayName.substring(1);
 
     eventsClassesBuilders
         .add(commonGenerator.generateProtocolClass(protocol, className));

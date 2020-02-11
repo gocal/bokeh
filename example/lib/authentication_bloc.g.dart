@@ -199,3 +199,32 @@ class Error implements AuthenticationState {
     );
   }
 }
+
+// **************************************************************************
+// BokehBlocGenerator
+// **************************************************************************
+
+extension AuthenticationEventExtension on AuthenticationEvent {
+  Stream<AuthenticationState> when(
+      {Stream<AuthenticationState> Function(AppStarted) appStarted,
+      Stream<AuthenticationState> Function(CredentialUpdated) credentialUpdated,
+      Stream<AuthenticationState> Function() loggedIn,
+      Stream<AuthenticationState> Function() loggedOut}) async* {
+    if (this is AppStarted) {
+      yield* appStarted(this as AppStarted);
+      return;
+    }
+    if (this is CredentialUpdated) {
+      yield* credentialUpdated(this as CredentialUpdated);
+      return;
+    }
+    if (this is LoggedIn) {
+      yield* loggedIn();
+      return;
+    }
+    if (this is LoggedOut) {
+      yield* loggedOut();
+      return;
+    }
+  }
+}

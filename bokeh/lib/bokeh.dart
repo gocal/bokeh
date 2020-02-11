@@ -1,27 +1,27 @@
 library bokeh;
 
-const protocol = Protocol(prefix: "_\$", suffix: "s");
-const data = Data(prefix: "_\$", suffix: "");
-const selector = Selector();
+const protocol = Protocol(prefix: "_");
+const data = Data(prefix: "_");
+
 
 class Data {
   final String prefix;
-  final String suffix;
+
   final String className;
-  const Data({this.className, this.prefix, this.suffix});
+  const Data({this.className, this.prefix});
 }
 
 class Protocol {
   final String prefix;
-  final String suffix;
   final String className;
   final bool copyWith;
-  const Protocol({this.className, this.copyWith, this.prefix, this.suffix});
+  const Protocol({this.className, this.copyWith, this.prefix});
 }
 
-class Selector {
-  final Type statesClass;
-  const Selector({this.statesClass});
+class BlocOf {
+  final Type state;
+  final Type event;
+  const BlocOf({this.state, this.event});
 }
 
 /// Jenkins Hash Functions

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/dart/element/type.dart';
 import 'package:build/src/builder/build_step.dart';
 import 'package:source_gen/source_gen.dart';
 import 'package:build/build.dart';
@@ -9,7 +10,7 @@ import 'package:dart_style/dart_style.dart';
 
 import 'package:recase/recase.dart';
 
-class BokehSelectorGenerator extends GeneratorForAnnotation<Selector> {
+class BokehBlocGenerator extends GeneratorForAnnotation<BlocOf> {
   @override
   FutureOr<String> generateForAnnotatedElement(
     Element element,
@@ -21,16 +22,14 @@ class BokehSelectorGenerator extends GeneratorForAnnotation<Selector> {
         '@${annotation} anontation must be used on class element',
       );
     }
-
-    final protocol = element as ClassElement;
+    
+    final protocol = annotation.read("event").typeValue as InterfaceType;
+    final statesProtocol = annotation.read("state").typeValue as InterfaceType;
 
     final protocolName =
-        protocol.displayName.substring(0, protocol.displayName.length - 1);
+        protocol.displayName.substring(1);
 
-    final statesProtocol = annotation.read("statesClass")?.typeValue;
-
-    final methodName = statesProtocol.displayName
-        .substring(0, statesProtocol.displayName.length - 1);
+    final methodName = statesProtocol.displayName.substring(1);
     final methodBuilder = MethodBuilder();
 
     final codeBlocs = List<Code>();
@@ -40,7 +39,7 @@ class BokehSelectorGenerator extends GeneratorForAnnotation<Selector> {
           : "";
 
       codeBlocs.add(Code(
-          "if(this is ${method.name.pascalCase}) { yield* ${method.name.camelCase}($args); return; }"));
+          '''if(this is ${method.name.pascalCase}) { yield* ${method.name.camelCase}($args); return; }'''));
     });
 
     methodBuilder
