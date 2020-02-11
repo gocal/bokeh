@@ -75,13 +75,17 @@ class BokehGenerator {
             ..type = refer(param.type.getDisplayString());
           return builder.build();
         }))
-        ..methods.add(generateEqualsMethod(className, method.parameters))
-        ..methods.add(generateHashCodeMethod(method.parameters))
-        ..methods.add(generateToStringMethod(className, method.parameters));
+        ..methods.add(_generateEqualsMethod(className, method.parameters))
+        ..methods.add(_generateToStringMethod(className, method.parameters));
+
+      if (method.parameters.isNotEmpty) {
+        eventClassBuilder.methods
+            .add(_generateHashCodeMethod(method.parameters));
+      }
 
       if (addCopyWith)
         eventClassBuilder.methods
-            .add(generateCopyWithMethod(className, method.parameters));
+            .add(_generateCopyWithMethod(className, method.parameters));
 
       return eventClassBuilder;
     }).toList();
@@ -119,7 +123,8 @@ class BokehGenerator {
         });
   }
 
-  Method generateEqualsMethod(String className, List<ParameterElement> fields) {
+  Method _generateEqualsMethod(
+      String className, List<ParameterElement> fields) {
     MethodBuilder mb = MethodBuilder()
       ..name = 'operator=='
       ..requiredParameters.add((ParameterBuilder()..name = 'other').build())
@@ -150,25 +155,17 @@ class BokehGenerator {
     return false;
   }
 
-  Method generateHashCodeMethod(List<ParameterElement> fields) {
-    String body;
+  Method _generateHashCodeMethod(List<ParameterElement> fields) {
+    var hashString = "0";
 
-    if (fields.isEmpty) {
-      body = """
- super.hashCode;
-            """;
-    } else {
-      var hashString = "0";
+    for (int i = 0; i < fields.length; i++) {
+      var param = fields[i];
+      hashString = "\$jc($hashString, ${param.name}.hashCode)";
+    }
 
-      for (int i = 0; i < fields.length; i++) {
-        var param = fields[i];
-        hashString = "\$jc($hashString, ${param.name}.hashCode)";
-      }
-
-      body = """
+    final body = """
           return \$jf($hashString);
         """;
-    }
 
     final builder = MethodBuilder()
       ..name = 'hashCode'
@@ -179,7 +176,7 @@ class BokehGenerator {
     return builder.build();
   }
 
-  Method generateCopyWithMethod(
+  Method _generateCopyWithMethod(
       String className, List<ParameterElement> fields) {
     final params = fields
         .map((field) => ParameterBuilder()
@@ -188,16 +185,16 @@ class BokehGenerator {
           ..named = true)
         .map((paramBuilder) => paramBuilder.build());
 
-    final mb = MethodBuilder()
+    final builder = MethodBuilder()
       ..name = 'copyWith'
       ..optionalParameters.addAll(params)
       ..returns = refer(className)
       ..body = Code(_copyToMethodBody(className, fields));
 
-    return mb.build();
+    return builder.build();
   }
 
-  Method generateToStringMethod(
+  Method _generateToStringMethod(
       String className, List<ParameterElement> fields) {
     final mb = MethodBuilder()
       ..name = 'toString'
@@ -219,10 +216,10 @@ class BokehGenerator {
     });
 
     return '''
-  if (identical(this, other)) return true;
-  if (other is! $className) return false;
-  return $fieldEquals;
-''';
+    if (identical(this, other)) return true;
+    if (other is! $className) return false;
+    return $fieldEquals;
+    ''';
   }
 
   String _copyToMethodBody(String className, List<ParameterElement> fields) {

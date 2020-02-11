@@ -1,15 +1,6 @@
 library bokeh;
 
 const protocol = Protocol(prefix: "_");
-const data = Data(prefix: "_");
-
-
-class Data {
-  final String prefix;
-
-  final String className;
-  const Data({this.className, this.prefix});
-}
 
 class Protocol {
   final String prefix;
