@@ -1,8 +1,6 @@
 name: bokeh
-version: 0.0.3
+version: 0.1.0
 description: Bloc Boilerplate generator
-authors:
-- Marek Gocał <marcin.gocal@gmail.com>
 homepage: https://github.com/gocal/bokeh.dart
 
 environment:
