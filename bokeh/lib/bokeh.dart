@@ -1,33 +1,27 @@
 library bokeh;
 
-const protocol = Protocol();
-const data = Data();
+const protocol = Protocol(prefix: "_\$", suffix: "s");
+const data = Data(prefix: "_\$", suffix: "");
 const selector = Selector();
 
-class Data extends _BohehAnnotation {
-  final String className;
-  const Data({this.className, String prefix, String suffix})
-      : super(prefix: prefix, suffix: suffix);
-}
-
-class Protocol extends _BohehAnnotation {
-  final String className;
-  final bool copyWith;
-  const Protocol({this.className, this.copyWith, String prefix, String suffix})
-      : super(prefix: prefix, suffix: suffix);
-}
-
-class Selector extends _BohehAnnotation {
-  final Type statesClass;
-  const Selector({this.statesClass, String prefix, String suffix})
-      : super(prefix: prefix, suffix: suffix);
-}
-
-class _BohehAnnotation {
+class Data {
   final String prefix;
   final String suffix;
+  final String className;
+  const Data({this.className, this.prefix, this.suffix});
+}
 
-  const _BohehAnnotation({this.prefix = "_", this.suffix = ""});
+class Protocol {
+  final String prefix;
+  final String suffix;
+  final String className;
+  final bool copyWith;
+  const Protocol({this.className, this.copyWith, this.prefix, this.suffix});
+}
+
+class Selector {
+  final Type statesClass;
+  const Selector({this.statesClass});
 }
 
 /// Jenkins Hash Functions

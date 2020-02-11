@@ -3,7 +3,7 @@
 part of 'authentication_bloc.dart';
 
 // **************************************************************************
-// BokehBlocEventsGenerator
+// BokehProtocolGenerator
 // **************************************************************************
 
 abstract class AuthenticationEvent {
@@ -33,6 +33,12 @@ class AppStarted implements AuthenticationEvent {
   String toString() {
     return 'AppStarted [\'timestamp\': ${this.timestamp},]';
   }
+
+  AppStarted copyWith({int timestamp}) {
+    return AppStarted(
+      timestamp ?? this.timestamp,
+    );
+  }
 }
 
 class CredentialUpdated implements AuthenticationEvent {
@@ -55,6 +61,13 @@ class CredentialUpdated implements AuthenticationEvent {
   String toString() {
     return 'CredentialUpdated [\'login\': ${this.login},\'password\': ${this.password},]';
   }
+
+  CredentialUpdated copyWith({String login, String password}) {
+    return CredentialUpdated(
+      login: login ?? this.login,
+      password: password ?? this.password,
+    );
+  }
 }
 
 class LoggedIn implements AuthenticationEvent {
@@ -72,6 +85,10 @@ class LoggedIn implements AuthenticationEvent {
 
   String toString() {
     return 'LoggedIn []';
+  }
+
+  LoggedIn copyWith() {
+    return LoggedIn();
   }
 }
 
@@ -91,11 +108,11 @@ class LoggedOut implements AuthenticationEvent {
   String toString() {
     return 'LoggedOut []';
   }
-}
 
-// **************************************************************************
-// BokehBlocStatesGenerator
-// **************************************************************************
+  LoggedOut copyWith() {
+    return LoggedOut();
+  }
+}
 
 abstract class AuthenticationState {
   static AuthenticationState idle() => Idle();
@@ -180,34 +197,5 @@ class Error implements AuthenticationState {
     return Error(
       e ?? this.e,
     );
-  }
-}
-
-// **************************************************************************
-// BokehBlocSelectorGenerator
-// **************************************************************************
-
-extension AuthenticationEventExtension on AuthenticationEvent {
-  Stream<AuthenticationState> when(
-      {Stream<AuthenticationState> Function(AppStarted) appStarted,
-      Stream<AuthenticationState> Function(CredentialUpdated) credentialUpdated,
-      Stream<AuthenticationState> Function() loggedIn,
-      Stream<AuthenticationState> Function() loggedOut}) async* {
-    if (this is AppStarted) {
-      yield* appStarted(this as AppStarted);
-      return;
-    }
-    if (this is CredentialUpdated) {
-      yield* credentialUpdated(this as CredentialUpdated);
-      return;
-    }
-    if (this is LoggedIn) {
-      yield* loggedIn();
-      return;
-    }
-    if (this is LoggedOut) {
-      yield* loggedOut();
-      return;
-    }
   }
 }

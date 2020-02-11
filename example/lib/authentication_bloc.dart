@@ -8,32 +8,38 @@ part 'authentication_bloc.g.dart';
 ///
 /// Model
 ///
+
 @data
-abstract class _Employee {
-  double x;
-  double y;
+abstract class _$Employee {
+  int get id;
+  String get name;
+}
+
+@data
+abstract class _$Employee {
+  int get id;
+  String get name;
 }
 
 ///
 /// Events
 ///
 @protocol
-@Selector(statesClass: AuthenticationStates)
 abstract class AuthenticationEvents {
-  AppStarted(int timestamp);
-  CredentialUpdated({String login, String password = "loremIpsum"});
-  LoggedIn();
-  LoggedOut();
+  appStarted(int timestamp);
+  credentialUpdated({String login, String password = "loremIpsum"});
+  loggedIn();
+  loggedOut();
 }
 
 ///
 /// States
 ///
 @protocol
-abstract class AuthenticationStates {
-  Idle();
-  Loading({int progress, String message});
-  Error(Exception e);
+abstract class _$AuthenticationStates {
+  idle();
+  loading({int progress, String message});
+  error(Exception e);
 }
 
 ///
@@ -47,6 +53,8 @@ class AuthenticationBloc
   @override
   Stream<AuthenticationState> mapEventToState(
       AuthenticationEvent event) async* {
+    /*
+    @Selector(statesClass: AuthenticationStates)
     yield* event.when(
       //
       appStarted: (event) async* {
@@ -70,5 +78,6 @@ class AuthenticationBloc
       },
       loggedIn: () async* {},
     );
+    */
   }
 }
